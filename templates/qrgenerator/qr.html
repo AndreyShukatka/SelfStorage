@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Генератор QR кода</title>
+</head>
+<body>
+<h1>Генератор QR кода</h1>
+<form method="post">
+    {% csrf_token %}
+    <h3>Введите адрес сайта</h3>
+    <input type="text" name="data">
+    <input type="submit" value="Получить QR код">
+</form>
+{% if qr_image %}
+    <h4>Ваш QR код:</h4>
+    <img src="/media/qr/test.png">
+{% endif %}
+</body>
+</html>
