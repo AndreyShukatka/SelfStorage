@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'qrgenerator.apps.QrgeneratorConfig'
     'sitestorage.apps.SitestorageConfig'
 ]
 
@@ -86,10 +87,10 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
-
 
 AUTH_USER_MODEL = 'sitestorage.User'
 
@@ -100,3 +101,9 @@ MEDIA_URL = '/media/'
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_USE_SSL = True
+EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_PORT = env('EMAIL_PORT')
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
