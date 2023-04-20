@@ -20,7 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'qrgenerator.apps.QrgeneratorConfig'
+    'qrgenerator.apps.QrgeneratorConfig',
     'sitestorage.apps.SitestorageConfig'
 ]
 
