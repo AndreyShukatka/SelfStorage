@@ -81,7 +81,7 @@
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body d-flex justify-content-center align-items-center">
-				<form class="d-flex flex-column align-items-center" style="max-width: 420px", method="POST">
+				<form class="d-flex flex-column align-items-center" style="max-width: 420px" method="POST">
 					<h1 class="modal-title text-center fw-bold mb-3">Вход</h1>
 					{% csrf_token %}
 					{{ user_login_form.as_p }}

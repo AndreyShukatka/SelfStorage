@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from .forms import UserRegistrationForm, UserAuthorizationForm
 from django.contrib.auth import authenticate, login
+from .models import User
+
 
 def index(request):
     user_registration_form = UserRegistrationForm()
@@ -33,11 +35,14 @@ def faq(request):
 
 
 def my_rent(request):
+    if request.POST:
+        response = request.POST
+        user = User.objects.get(id=request.user.id)
+        email = response.get('EMAIL_EDIT')
+        phone = response.get('PHONE_EDIT')
+        user.email, user.phone = email, phone
+        user.save()
     return render(request, 'my-rent.html')
-
-
-def my_rent_empty(request):
-    return render(request, 'my-rent-empty.html')
 
 
 def registration(request):
