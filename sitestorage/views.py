@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from .forms import UserRegistrationForm, UserAuthorizationForm
 from django.contrib.auth import authenticate, login
 from .models import User
-
+from django.contrib.auth.hashers import make_password
 
 def index(request):
     user_registration_form = UserRegistrationForm()
@@ -37,11 +37,20 @@ def faq(request):
 def my_rent(request):
     if request.POST:
         response = request.POST
+
         user = User.objects.get(id=request.user.id)
+        password_old = user.password
+        password_new = response.get('PASSWORD_EDIT')
         email = response.get('EMAIL_EDIT')
         phone = response.get('PHONE_EDIT')
-        user.email, user.phone = email, phone
+        username = response.get('NAME_EDIT')
+        user.email, user.phone, user.username = email, phone, username
+        if password_new != password_old:
+            password_new = make_password(response.get('PASSWORD_EDIT'))
+            print(password_new)
+            user.password = password_new
         user.save()
+        return redirect('index')
     return render(request, 'my-rent.html')
 
 
