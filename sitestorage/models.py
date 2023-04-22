@@ -125,3 +125,52 @@ class Order(models.Model):
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
+
+
+class PaymentOrder(models.Model):
+    """Модель сущности Оплата"""
+    PENDING = 'PND'
+    SUCCESS = 'SCS'
+    CANCELED = 'CNC'
+
+    PAYMENT_STATUS_CHOICE = [
+        (PENDING, 'Ожидает подтверждения'),
+        (SUCCESS, 'Оплачен'),
+        (CANCELED, 'Отменен')
+    ]
+
+    order = models.ForeignKey(
+        Order,
+        on_delete=models.CASCADE,
+        related_name='payment',
+        verbose_name='Заказ',
+        default=None
+    )
+    card_number = models.CharField(
+        max_length=50,
+        verbose_name='Последние 4 цифры номера карты'
+    )
+    payment_id = models.CharField(
+        max_length=50,
+        blank=True,
+        verbose_name='ID платежа'
+    )
+    status = models.CharField(
+        max_length=3,
+        choices=PAYMENT_STATUS_CHOICE,
+        default=PENDING,
+        verbose_name='Статус'
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Создан'
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Обновлен'
+    )
+
+    class Meta:
+        verbose_name = 'Платеж'
+        verbose_name_plural = 'Платежи'
