@@ -2,6 +2,8 @@ from pathlib import Path
 from environs import Env
 import os
 
+from yookassa import Configuration
+
 env = Env()
 env.read_env()
 
@@ -106,3 +108,9 @@ EMAIL_HOST = env('EMAIL_HOST')
 EMAIL_PORT = env('EMAIL_PORT')
 EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+
+YOOMONEY_KEY = env.str('YOOMONEY_KEY')
+YOOMONEY_ID = env('YOOMONEY_ID')
+
+Configuration.account_id = YOOMONEY_ID
+Configuration.secret_key = YOOMONEY_KEY
