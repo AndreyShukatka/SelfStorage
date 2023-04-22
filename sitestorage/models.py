@@ -48,7 +48,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField('Имя', max_length=250, default='some_user')
     email = models.EmailField('Адрес электронной почты', max_length=50, unique=True)
-    phone = models.CharField('Телефон', max_length=20, blank=True, null=True)
+    phone = models.CharField('Телефон', max_length=20, blank=True)
     is_staff = models.BooleanField('Является сотрудником', default=False)
 
     USERNAME_FIELD = 'email'
@@ -65,7 +65,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class Cargo(models.Model):
-    title = models.CharField('Наименование', max_length=30, blank=True, null=True)
+    title = models.CharField('Наименование', max_length=30, blank=True)
     group = models.CharField('Группа груза', max_length=6, choices=PRODUCT_GROUP)
     weight = models.IntegerField('Вес, кг', blank=True, null=True)
     length = models.IntegerField('Длина, см', blank=True, null=True)
@@ -79,11 +79,16 @@ class Cargo(models.Model):
 
 
 class Storage(models.Model):
-    title = models.CharField('Наименование', max_length=10, blank=True, null=True)
+    title = models.CharField('Наименование', max_length=10, blank=True)
     length = models.IntegerField('Длина, м')
     width = models.IntegerField('Ширина, м')
     height = models.IntegerField('Высота, м')
     photo = models.ImageField('Фото контейнера', upload_to='media/', blank=True, null=True)
+    temperature = models.IntegerField(verbose_name='Температура в боксе')
+    address = models.CharField(max_length=150, verbose_name='Адрес')
+    price = models.IntegerField(verbose_name='Цена')
+    quantity = models.IntegerField(verbose_name='Доступное количество боксов')
+    occupied = models.IntegerField(default=0, verbose_name='Занято боксов')
 
     class Meta:
         verbose_name = 'Контейнер'

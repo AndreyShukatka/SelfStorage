@@ -14,10 +14,16 @@ from django.contrib.auth.hashers import make_password
 class Index(View):
     template_name = 'sitestorage/index.html'
 
-    def get(self, request, *args, **kwargs):
+    def get_context_data(self):
+        storage = Storage.objects.order_by('?')[0]
         context = {
-            'title': 'Self Storage'
+            'title': 'Self Storage',
+            'storage': storage
         }
+        return context
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data()
 
         return render(request, self.template_name, context)
 
@@ -39,9 +45,7 @@ class Index(View):
             user = authenticate(email=email, password=password)
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
 
-        context = {
-            'title': 'Self Storage'
-        }
+        context = self.get_context_data()
 
         return render(request, self.template_name, context)
 
