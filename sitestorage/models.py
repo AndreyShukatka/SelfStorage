@@ -33,20 +33,28 @@ class UserManager(BaseUserManager):
         return user
 
     def create_user(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
         return self._create_user(email, password, **extra_fields)
 
     def create_superuser(self, email, password, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError(
+                'Superuser must have is_staff=True.'
+            )
         if extra_fields.get('is_superuser') is not True:
-            raise ValueError('Superuser must have is_superuser=True.')
+            raise ValueError(
+                'Superuser must have is_superuser=True.'
+            )
 
         return self._create_user(email, password, **extra_fields)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    username = models.CharField('Имя', max_length=250, default='some_user')
+    username = models.CharField('Имя', max_length=250, default='some_user', blank=True)
     email = models.EmailField('Адрес электронной почты', max_length=50, unique=True)
     phone = models.CharField('Телефон', max_length=20, blank=True)
     is_staff = models.BooleanField('Является сотрудником', default=False)
