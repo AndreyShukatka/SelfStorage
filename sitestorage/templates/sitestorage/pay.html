@@ -1,0 +1,71 @@
+{% extends 'sitestorage/base.html' %}
+{% load static %}
+{% block content %}
+<section class="container mt-header">
+	<div>Оплата</div>
+		<form action="{% url 'pay' storage_pk %}" method="post">
+			{% csrf_token %}
+			{{ order_form.errors }}
+			{% if order_form.errors %}
+				{% for field in order_form %}
+					{% for error in field.errors %}
+						<div class="error-msg">
+							<strong><i class="fa fa-times-circle"></i> {{ error|escape }}</strong>
+						</div>
+					{% endfor %}
+				{% endfor %}
+			{% endif %}
+	    <div>
+		    <div class="order__form_intro">номер карты</div>
+				{{ payment_form.card_number }}
+				{% if payment_form.card_number.errors %}
+					<div class="error-msg">
+					    <strong><i class="fa fa-times-circle"></i> {{ payment_form.card_number.errors }}</strong>
+					</div>
+				{% endif %}
+				<div>
+					{{ payment_form.card_month }}
+					{% if payment_form.card_month.errors %}
+						<div class="error-msg">
+							<strong><i class="fa fa-times-circle"></i> {{ payment_form.card_month.errors }}</strong>
+						</div>
+					{% endif %}
+					{{ payment_form.card_year }}
+					{% if payment_form.card_year.errors %}
+						<div class="error-msg">
+							<strong><i class="fa fa-times-circle"></i> {{ payment_form.card_year.errors }}</strong>
+						</div>
+					{% endif %}
+				</div>
+				{{ payment_form.card_holder }}
+				{% if payment_form.card_holder.errors %}
+					<div class="error-msg">
+						<strong><i class="fa fa-times-circle"></i> {{ payment_form.card_holder.errors }}</strong>
+					</div>
+				{% endif %}
+				{{ payment_form.card_cvc }}
+				{% if payment_form.card_cvc.errors %}
+					<div class="error-msg">
+						<strong><i class="fa fa-times-circle"></i> {{ payment_form.card_cvc.errors }}</strong>
+					</div>
+				{% endif %}
+			</div>
+			<div>
+				<div>Ваш e-mail (необязательно)</div>
+					{{ payment_form.email }}
+				</div>
+			</div>
+			<div></div>
+			<div class="order__form_btns ficb">
+				<button class="btn order__form_pay">Оплатить</button>
+				<button class="btn order__form_btn">Назад</button>
+			</div>
+		</form>
+				</div>
+				<!-- <div class="blockImgHiden"></div> -->
+			</div>
+		</div>
+	</div>
+</section>
+
+{% endblock %}

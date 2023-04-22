@@ -1,14 +1,19 @@
+import datetime
+import uuid
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LogoutView
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import UpdateView, ListView
-from .forms import UserProfileForm, UserRegistrationForm, UserAuthorizationForm
+from .forms import PaymentForm, UserProfileForm, UserRegistrationForm, UserAuthorizationForm
 from django.contrib.auth import authenticate, login
-from .models import Storage, User
 from django.contrib.auth.hashers import make_password
+from yookassa import Payment
+
+from .models import Order, PaymentOrder, Storage, User
 
 
 class Index(View):
@@ -16,9 +21,20 @@ class Index(View):
 
     def get_context_data(self):
         storage = Storage.objects.order_by('?')[0]
+        storage_quantity = storage.address.get_storage_quantity()
+        storage_occupied = storage.address.occupied
         context = {
             'title': 'Self Storage',
-            'storage': storage
+            'storage': {
+                'pk': storage.pk,
+                'photo': storage.photo.url,
+                'address': storage.address,
+                'temperature': storage.temperature,
+                'avaible': storage_quantity - storage_occupied,
+                'quantity': storage_quantity,
+                'height': storage.height,
+                'price': storage.price
+            }
         }
         return context
 
@@ -163,6 +179,88 @@ class FaqView(View):
 
         return render(request, self.template_name, context)
 
+def pay(request, pk):
+    storage_obj = get_object_or_404(Storage, pk=pk)
+    if request.method == 'POST':
+        payment_form = PaymentForm(request.POST)
+        card_year = f"20{payment_form.data['card_year']}"
+        card_month = payment_form.data['card_month']
+        card_holder = payment_form.data['card_holder']
+        cvc = payment_form.data['card_cvc']
+        if payment_form.is_valid():
+            form = payment_form.save(commit=False)
+            card_number = form.card_number
+            form.card_number = form.card_number[-4:]
+            form.storage = storage_obj
+            cost = storage_obj.price
+            payment_payload = {
+                "amount": {
+                    "value": str(cost),
+                    "currency": "RUB"
+                },
+                "payment_method_data": {
+                    "type": "bank_card",
+                    "card": {
+                        "cardholder": card_holder,
+                        "csc": cvc,
+                        "expiry_month": card_month,
+                        "expiry_year": card_year,
+                        "number": card_number
+                    }
+                },
+                "confirmation": {
+                    "type": "redirect",
+                    "return_url": request.build_absolute_uri(reverse('confirm_pay', kwargs={'pk': pk}))
+                },
+                "description": form.storage
+            }
+            payment = Payment.create(payment_payload)
+
+            payment_confirmation = payment.confirmation.confirmation_url
+            payment_id = payment.id
+            form.payment_id = payment_id
+
+            form.save()
+
+            return HttpResponseRedirect(payment_confirmation)
+    else:
+        payment_form = PaymentForm()
+    context = {
+        'storage_pk': storage_obj.pk,
+        'payment_form': payment_form
+    }
+    return render(request, 'sitestorage/pay.html', context)
+
+def confirm_pay(request, pk):
+    storage_obj = get_object_or_404(Storage, pk=pk)
+    cost = storage_obj.price
+    payment = PaymentOrder.objects.filter(storage=storage_obj).first()
+    payment_id = payment.payment_id
+    idempotence_key = str(uuid.uuid4())
+    response = Payment.capture(
+        payment_id,
+        {
+            "amount": {
+                "value": cost,
+                "currency": "RUB"
+            }
+        },
+        idempotence_key
+    )
+    if response.status == 'succeeded':
+        payment.status = PaymentOrder.SUCCESS
+        order_obj = Order.objects.create(
+            user=request.user,
+            storage=storage_obj,
+            reception_conditions='sm',
+            delivery_conditions='sm',
+            reception_date=datetime.datetime.now(),
+            paid_to=datetime.datetime.now() + datetime.timedelta(days=30)
+        )
+        payment.order = order_obj
+        payment.save()
+
+    return HttpResponseRedirect(reverse('index'))
 
 def get_modal_window(request):
     return HttpResponse("<script> document.getElementById('Entrance').click()</script>")

@@ -88,6 +88,7 @@ class Cargo(models.Model):
 
 class StorageAddress(models.Model):
     address = models.CharField(max_length=150, verbose_name='Адрес')
+    occupied = models.IntegerField(default=0, verbose_name='Занято боксов')
 
     class Meta:
         verbose_name = 'Адрес склада'
@@ -96,22 +97,26 @@ class StorageAddress(models.Model):
     def __str__(self) -> str:
         return self.address
 
+    def get_storage_quantity(self):
+        return self.storages.all().count()
+
 
 class Storage(models.Model):
-    title = models.CharField('Наименование', max_length=10, blank=True)
+    title = models.CharField('Наименование', max_length=100, blank=True)
     length = models.IntegerField('Длина, м')
     width = models.IntegerField('Ширина, м')
     height = models.DecimalField(max_digits=2, decimal_places=1, verbose_name='Высота, м')
-    photo = models.ImageField('Фото контейнера', upload_to='media/', blank=True, null=True)
+    photo = models.ImageField('Фото контейнера', blank=True, null=True)
     temperature = models.IntegerField(verbose_name='Температура в боксе')
     address = models.ForeignKey(StorageAddress, on_delete=models.CASCADE, related_name='storages', verbose_name='Адрес')
     price = models.IntegerField(verbose_name='Цена')
-    quantity = models.IntegerField(verbose_name='Доступное количество боксов')
-    occupied = models.IntegerField(default=0, verbose_name='Занято боксов')
 
     class Meta:
         verbose_name = 'Контейнер'
         verbose_name_plural = 'Контейнеры'
+
+    def __str__(self) -> str:
+        return f'{self.length} - {self.width} - {self.height} м'
 
 
 class Order(models.Model):
@@ -119,12 +124,6 @@ class Order(models.Model):
         User,
         verbose_name='Клиент',
         related_name='Заказы',
-        on_delete=models.CASCADE
-    )
-    cargo = models.ForeignKey(
-        Cargo,
-        verbose_name='Груз',
-        related_name='Грузы',
         on_delete=models.CASCADE
     )
     storage = models.ForeignKey(
@@ -168,7 +167,15 @@ class PaymentOrder(models.Model):
         on_delete=models.CASCADE,
         related_name='payment',
         verbose_name='Заказ',
-        default=None
+        default=None,
+        blank=True,
+        null=True
+    )
+    storage = models.ForeignKey(
+        Storage,
+        on_delete=models.CASCADE,
+        related_name='storage_payments',
+        verbose_name='Хранилище'
     )
     card_number = models.CharField(
         max_length=50,
