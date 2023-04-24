@@ -72,6 +72,14 @@ class ProfileView(LoginRequiredMixin, UpdateView):
     form_class = UserProfileForm
     success_url = reverse_lazy('index')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        boxes_expiring = Order.objects.filter(paid_to__lt=datetime.datetime.now() + datetime.timedelta(days=10)).order_by('paid_to')
+        boxes = Order.objects.filter(paid_to__gte=datetime.datetime.now() + datetime.timedelta(days=10)).order_by('paid_to')
+        context['boxes_expiring'] = boxes_expiring.first()
+        context['boxes'] = boxes
+        return context
+
     def get_object(self, queryset=None):
         if self.request.user.is_anonymous:
             return None

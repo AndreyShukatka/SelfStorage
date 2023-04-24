@@ -144,6 +144,7 @@ class Order(models.Model):
     paid_to = models.DateField('Оплачено до')
     comment = models.CharField('Комментарий к заказу', max_length=100, blank=True, null=True)
     qr_code = models.CharField(max_length=40, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = 'Заказ'

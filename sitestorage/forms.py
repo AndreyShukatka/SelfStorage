@@ -104,7 +104,7 @@ class PaymentForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
-            field.widget.attrs['class'] = 'order__form_input orderStep_form_input'
+            field.widget.attrs['class'] = 'form-control border-8 mb-4 me-3 py-3 px-5 border-0 fs_24 SelfStorage__bg_lightgrey'
 
     class Meta:
         model = PaymentOrder
